@@ -13,15 +13,24 @@ export default class UploadButton extends React.Component {
         const response = await axios.post("http://localhost:5000/polylines",{"Image": image,
         "Position": this.props.drawingPos});
 
+        let parseCoordsFormat = (coords)=>{
+        let parsedCoords = [];
+          coords.forEach((coord)=>{
+              parsedCoords.push({"lat": parseFloat(coord[0]), "lng": parseFloat(coord[1])});
+          });
+            return parsedCoords;
+        };
+
         // Reformat the response and update the paths coordinates.
-        let coords = response.data;
-        let pathCoords = [];
-        coords.forEach((coord)=>{
-           pathCoords.push({"lat": parseFloat(coord[0]), "lng": parseFloat(coord[1])});
-        });
+        let coords = response.data.segments;
+        let resultCoords = response.data.result;
+        console.log(response);
+        let pathCoords = parseCoordsFormat(coords);
+        let pathResult = parseCoordsFormat(resultCoords);
 
         // Update the drawn coordinates used in the given Polyline.
-        this.props.updateFunc(pathCoords);
+        this.props.updatePath(pathCoords);
+        this.props.updateResult(pathResult);
     }
 
     setImage(event) {

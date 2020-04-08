@@ -20,6 +20,8 @@ const MyMapComponent = compose(
     // Declare a state for the coordinates drawn for the line segments.
     let [pathCoordinates, pathUpdate] = useState([]);
 
+    let [resultCoordinates, updateResult] = useState([]);
+
     // Declare state for the chosen drawing position based on the user's request.
     let [drawingPosition, updatePosition] = useState([]);
 
@@ -48,12 +50,12 @@ const MyMapComponent = compose(
 
     return (<GoogleMap
         defaultZoom={8}
-        defaultCenter={{lat: 32.082882, lng: 34.753798}}
+        defaultCenter={{lat: 50.7475373, lng: 7.1580004}}
         onClick={(event)=>onClickCallback(event)}
     >
         <CustomDrawingManagerControl marginLeft={4} marginTop={12} >
             <button onClick={(e)=>{choosingLocationClicked(e)}}>Choose Drawing Location</button>
-            <UploadButton drawingPos={drawingPosition} updateFunc={pathUpdate}/>
+            <UploadButton drawingPos={drawingPosition} updatePath={pathUpdate} updateResult={updateResult}/>
         </CustomDrawingManagerControl>
 
         {/*<CustomDrawingManagerControl marginLeft={180} marginTop={12}></CustomDrawingManagerControl>*/}
@@ -64,6 +66,23 @@ const MyMapComponent = compose(
             geodesic={true}
             options={{
                 strokeColor: "#ff2527",
+                strokeOpacity: 0.75,
+                strokeWeight: 2,
+                icons: [
+                    {
+                        icon: lineSymbol,
+                        offset: "0",
+                        repeat: "20px"
+                    }
+                ]
+            }}
+        />
+
+        <Polyline
+            path={resultCoordinates}
+            geodesic={true}
+            options={{
+                strokeColor: "blue",
                 strokeOpacity: 0.75,
                 strokeWeight: 2,
                 icons: [

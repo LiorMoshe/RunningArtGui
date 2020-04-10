@@ -24,6 +24,8 @@ export default class UploadButton extends React.Component {
         // Reformat the response and update the paths coordinates.
         let coords = response.data.segments;
         let resultCoords = response.data.result;
+        let nodes = response.data.nodes;
+        this.props.updateNodes(response.data.nodes);
         console.log(response);
         let pathCoords = parseCoordsFormat(coords);
         let pathResult = parseCoordsFormat(resultCoords);

@@ -25,6 +25,9 @@ const MyMapComponent = compose(
     // Declare state for the chosen drawing position based on the user's request.
     let [drawingPosition, updatePosition] = useState([]);
 
+    // Declare a state for osm's nodes, they will be drawn as markers on the map.
+    let [nodes, updateNodes] = useState([]);
+
     let [onClickCallback, updateClickCallback] = useState(()=>{
         return (event)=> {};
     });
@@ -33,6 +36,13 @@ const MyMapComponent = compose(
         strokeOpacity: 1,
         scale: 4
     };
+
+    let symbolThree = {
+        path: 'M -2,-2 2,2 M 2,-2 -2,2',
+        strokeColor: '#292',
+        strokeWeight: 4
+    };
+
 
     let choosingLocationClicked = (e)=>{
         e.preventDefault();
@@ -49,13 +59,14 @@ const MyMapComponent = compose(
     };
 
     return (<GoogleMap
-        defaultZoom={8}
-        defaultCenter={{lat: 50.7475373, lng: 7.1580004}}
+        defaultZoom={16}
+        defaultCenter={{lat: 40.7589791, lng: -73.9939359}}
         onClick={(event)=>onClickCallback(event)}
     >
         <CustomDrawingManagerControl marginLeft={4} marginTop={12} >
             <button onClick={(e)=>{choosingLocationClicked(e)}}>Choose Drawing Location</button>
-            <UploadButton drawingPos={drawingPosition} updatePath={pathUpdate} updateResult={updateResult}/>
+            <UploadButton drawingPos={drawingPosition} updatePath={pathUpdate} updateResult={updateResult}
+                updateNodes={updateNodes}/>
         </CustomDrawingManagerControl>
 
         {/*<CustomDrawingManagerControl marginLeft={180} marginTop={12}></CustomDrawingManagerControl>*/}
@@ -95,6 +106,9 @@ const MyMapComponent = compose(
             }}
         />
         {drawingPosition.length !== 0 && <Marker position={{ lat: drawingPosition[0], lng: drawingPosition[1] }}/>}
+
+        {nodes.map(node=><Marker icon={symbolThree} position={{ lat: node[0], lng: node[1] }}/>)}
+
         {/*{props.isMarkerShown && <Marker position={{ lat: -34.397, lng: 150.644 }} onClick={props.onMarkerClick} />}*/}
     </GoogleMap>);
     }

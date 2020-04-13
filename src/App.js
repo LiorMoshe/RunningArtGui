@@ -18,7 +18,7 @@ const MyMapComponent = compose(
     withGoogleMap
 )((props) => {
     // Declare a state for the coordinates drawn for the line segments.
-    let [pathCoordinates, pathUpdate] = useState([]);
+    let [segments, pathUpdate] = useState([]);
 
     let [resultCoordinates, updateResult] = useState([]);
 
@@ -58,6 +58,7 @@ const MyMapComponent = compose(
       );
     };
 
+    var google = window.google;
     return (<GoogleMap
         defaultZoom={16}
         defaultCenter={{lat: 40.7589791, lng: -73.9939359}}
@@ -72,22 +73,44 @@ const MyMapComponent = compose(
         {/*<CustomDrawingManagerControl marginLeft={180} marginTop={12}></CustomDrawingManagerControl>*/}
 
         {/* Polyline which drawn the line segments which will be received from the server.*/}
-        <Polyline
-            path={pathCoordinates}
+        {/*<Polyline*/}
+        {/*    path={pathCoordinates}*/}
+        {/*    geodesic={true}*/}
+        {/*    options={{*/}
+        {/*        strokeColor: "#ff2527",*/}
+        {/*        strokeOpacity: 0.75,*/}
+        {/*        strokeWeight: 2,*/}
+        {/*        icons: [*/}
+        {/*            {*/}
+        {/*                icon: lineSymbol,*/}
+        {/*                offset: "0",*/}
+        {/*                repeat: "20px"*/}
+        {/*            }*/}
+        {/*        ]*/}
+        {/*    }}*/}
+        {/*/>*/}
+        {segments.map(segment=> segment.map(point=><Marker icon={symbolThree} position={point}/>))}
+        {segments.map(segment=><Polyline
+            path={segment}
             geodesic={true}
             options={{
                 strokeColor: "#ff2527",
                 strokeOpacity: 0.75,
                 strokeWeight: 2,
                 icons: [
-                    {
-                        icon: lineSymbol,
-                        offset: "0",
-                        repeat: "20px"
-                    }
+                    {symbolThree}
+                    // {
+                    //     path: google.maps.SymbolPath.CIRCLE,
+                    //     scale: 100
+                    // }
+                    // {
+                    //     icon: lineSymbol,
+                    //     offset: "0",
+                    //     repeat: "20px"
+                    // }
                 ]
             }}
-        />
+        />)}
 
         <Polyline
             path={resultCoordinates}
@@ -97,17 +120,17 @@ const MyMapComponent = compose(
                 strokeOpacity: 0.75,
                 strokeWeight: 2,
                 icons: [
-                    {
-                        icon: lineSymbol,
-                        offset: "0",
-                        repeat: "20px"
-                    }
+            //         {
+            //     path: google.maps.SymbolPath.CIRCLE,
+            //     scale: 10
+            // }
+            //         symbolThree
                 ]
             }}
         />
         {drawingPosition.length !== 0 && <Marker position={{ lat: drawingPosition[0], lng: drawingPosition[1] }}/>}
 
-        {nodes.map(node=><Marker icon={symbolThree} position={{ lat: node[0], lng: node[1] }}/>)}
+        {/*{nodes.map(node=><Marker icon={symbolThree} position={{ lat: node[0], lng: node[1] }}/>)}*/}
 
         {/*{props.isMarkerShown && <Marker position={{ lat: -34.397, lng: 150.644 }} onClick={props.onMarkerClick} />}*/}
     </GoogleMap>);

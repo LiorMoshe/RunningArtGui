@@ -7,6 +7,10 @@ import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import CustomDrawingManagerControl from "./CustomDrawingManagerControl";
 import UploadButton from "./UploadButton";
 
+
+const AnyReactComponent = ({text}) => <div>{text}</div>;
+
+
 const MyMapComponent = compose(
     withProps({
         googleMapURL: "https://maps.googleapis.com/maps/api/js?key=AIzaSyAYF8KmrqIUJ1F33q7YsAtcS1odJ3fdR9s&v=3.exp&libraries=geometry,drawing,places",
@@ -38,9 +42,15 @@ const MyMapComponent = compose(
     };
 
     let symbolThree = {
-        path: 'M -2,-2 2,2 M 2,-2 -2,2',
+        path: 'M -8,-8 8,8 M 8,-8 -8,8',
         strokeColor: '#292',
         strokeWeight: 4
+    };
+
+    let symbolThreeBlue = {
+        path: 'M -8,-8 8,8 M 8,-8 -8,8',
+        strokeColor: 'pink',
+        strokeWeight: 2
     };
 
 
@@ -59,6 +69,20 @@ const MyMapComponent = compose(
     };
 
     var google = window.google;
+
+    let getString = (point, segments)=>{
+        let finalString = "";
+        segments.forEach((otherPoint, idx)=>{
+            if (Math.abs(point.lat - otherPoint.lat) < 1e-20 && Math.abs(point.lng - otherPoint.lng) < 1e-20) {
+                if (finalString.length > 0) {
+                    finalString += ',';
+                }
+                finalString += idx.toString();
+            }
+        });
+        return finalString;
+    };
+
     return (<GoogleMap
         defaultZoom={16}
         defaultCenter={{lat: 40.7589791, lng: -73.9939359}}
@@ -70,26 +94,8 @@ const MyMapComponent = compose(
                 updateNodes={updateNodes}/>
         </CustomDrawingManagerControl>
 
-        {/*<CustomDrawingManagerControl marginLeft={180} marginTop={12}></CustomDrawingManagerControl>*/}
+        {segments.map(segment=> segment.map((point, idx) =><Marker label={idx.toString()} icon={symbolThree} position={point}/>))}
 
-        {/* Polyline which drawn the line segments which will be received from the server.*/}
-        {/*<Polyline*/}
-        {/*    path={pathCoordinates}*/}
-        {/*    geodesic={true}*/}
-        {/*    options={{*/}
-        {/*        strokeColor: "#ff2527",*/}
-        {/*        strokeOpacity: 0.75,*/}
-        {/*        strokeWeight: 2,*/}
-        {/*        icons: [*/}
-        {/*            {*/}
-        {/*                icon: lineSymbol,*/}
-        {/*                offset: "0",*/}
-        {/*                repeat: "20px"*/}
-        {/*            }*/}
-        {/*        ]*/}
-        {/*    }}*/}
-        {/*/>*/}
-        {segments.map(segment=> segment.map(point=><Marker icon={symbolThree} position={point}/>))}
         {segments.map(segment=><Polyline
             path={segment}
             geodesic={true}
@@ -99,19 +105,12 @@ const MyMapComponent = compose(
                 strokeWeight: 2,
                 icons: [
                     {symbolThree}
-                    // {
-                    //     path: google.maps.SymbolPath.CIRCLE,
-                    //     scale: 100
-                    // }
-                    // {
-                    //     icon: lineSymbol,
-                    //     offset: "0",
-                    //     repeat: "20px"
-                    // }
                 ]
             }}
         />)}
 
+
+        {resultCoordinates.map((point, idx)=><Marker label={getString(point, resultCoordinates)} icon={symbolThreeBlue}  position={point}/>)}
         <Polyline
             path={resultCoordinates}
             geodesic={true}
@@ -119,20 +118,9 @@ const MyMapComponent = compose(
                 strokeColor: "blue",
                 strokeOpacity: 0.75,
                 strokeWeight: 2,
-                icons: [
-            //         {
-            //     path: google.maps.SymbolPath.CIRCLE,
-            //     scale: 10
-            // }
-            //         symbolThree
-                ]
             }}
         />
         {drawingPosition.length !== 0 && <Marker position={{ lat: drawingPosition[0], lng: drawingPosition[1] }}/>}
-
-        {/*{nodes.map(node=><Marker icon={symbolThree} position={{ lat: node[0], lng: node[1] }}/>)}*/}
-
-        {/*{props.isMarkerShown && <Marker position={{ lat: -34.397, lng: 150.644 }} onClick={props.onMarkerClick} />}*/}
     </GoogleMap>);
     }
 );

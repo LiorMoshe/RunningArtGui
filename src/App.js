@@ -53,6 +53,12 @@ const MyMapComponent = compose(
         strokeWeight: 2
     };
 
+    let starSymbolCyan = {
+        path: 'M -2,-2 2,2 M 2,-2 -2,2',
+        strokeColor: 'cyan',
+        strokeWeight: 2
+    };
+
 
     let choosingLocationClicked = (e)=>{
         e.preventDefault();
@@ -71,6 +77,8 @@ const MyMapComponent = compose(
     var google = window.google;
 
     let getString = (point, segments)=>{
+        console.log("Segments: ", segments);
+        console.log("Point: ", point);
         let finalString = "";
         segments.forEach((otherPoint, idx)=>{
             if (Math.abs(point.lat - otherPoint.lat) < 1e-20 && Math.abs(point.lng - otherPoint.lng) < 1e-20) {
@@ -80,12 +88,13 @@ const MyMapComponent = compose(
                 finalString += idx.toString();
             }
         });
+        console.log("Final String: ", finalString);
         return finalString;
     };
 
     return (<GoogleMap
         defaultZoom={16}
-        defaultCenter={{lat: 40.7589791, lng: -73.9939359}}
+        defaultCenter={{lat: 32.0596552, lng: 34.7724450}}
         onClick={(event)=>onClickCallback(event)}
     >
         <CustomDrawingManagerControl marginLeft={4} marginTop={12} >
@@ -94,7 +103,7 @@ const MyMapComponent = compose(
                 updateNodes={updateNodes}/>
         </CustomDrawingManagerControl>
 
-        {segments.map(segment=> segment.map((point, idx) =><Marker label={idx.toString()} icon={symbolThree} position={point}/>))}
+        {segments.map(segment=> segment.map((point, idx) =><Marker label={getString(point, segment)} icon={symbolThree} position={point}/>))}
 
         {segments.map(segment=><Polyline
             path={segment}
@@ -120,6 +129,8 @@ const MyMapComponent = compose(
                 strokeWeight: 2,
             }}
         />
+
+        {nodes.map(node=><Marker icon={starSymbolCyan} position={{"lat": node[0], "lng":node[1]}}/>)}
         {drawingPosition.length !== 0 && <Marker position={{ lat: drawingPosition[0], lng: drawingPosition[1] }}/>}
     </GoogleMap>);
     }

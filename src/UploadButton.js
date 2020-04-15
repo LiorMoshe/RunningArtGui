@@ -22,6 +22,7 @@ export default class UploadButton extends React.Component {
         };
 
         // Reformat the response and update the paths coordinates.
+        console.log("Received data: ", response.data);
         let coords = response.data.segments;
         let segments = [];
 

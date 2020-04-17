@@ -130,7 +130,7 @@ const MyMapComponent = compose(
             }}
         />
 
-        {nodes.map(node=><Marker icon={starSymbolCyan} position={{"lat": node[0], "lng":node[1]}}/>)}
+        {/*{nodes.map(node=><Marker icon={starSymbolCyan} position={{"lat": node[0], "lng":node[1]}}/>)}*/}
         {drawingPosition.length !== 0 && <Marker position={{ lat: drawingPosition[0], lng: drawingPosition[1] }}/>}
     </GoogleMap>);
     }

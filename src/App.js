@@ -4,11 +4,13 @@ import './App.css';
 import { compose, withProps } from "recompose"
 import { withScriptjs, withGoogleMap, GoogleMap, Polyline, Marker } from "react-google-maps"
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
+import { Dropdown } from 'semantic-ui-react'
 import CustomDrawingManagerControl from "./CustomDrawingManagerControl";
-import UploadButton from "./UploadButton";
-
-
-const AnyReactComponent = ({text}) => <div>{text}</div>;
+import UploadButton from "./UploadButton/UploadButton";
+import Select from '@material-ui/core/Select';
+import SendButton from "./SendButton/SendButton";
+import {TextField} from "@material-ui/core";
+import shortid from "shortid";
 
 
 const MyMapComponent = compose(
@@ -32,6 +34,18 @@ const MyMapComponent = compose(
     // Declare a state for osm's nodes, they will be drawn as markers on the map.
     let [nodes, updateNodes] = useState([]);
 
+    // Declare a state for the run's distance.
+    let [distance, updateDist] = useState(1000);
+
+    // Declare a state for the drawn text.
+    let [text, updateText] = useState('H');
+
+    // Declare a state for the saved image.
+    let [image, updateImage] = useState({});
+
+    // Declare a state for the mode.
+    let [mode, updateMode] = useState('I');
+
     let [onClickCallback, updateClickCallback] = useState(()=>{
         return (event)=> {};
     });
@@ -53,17 +67,9 @@ const MyMapComponent = compose(
         strokeWeight: 2
     };
 
-    let starSymbolCyan = {
-        path: 'M -2,-2 2,2 M 2,-2 -2,2',
-        strokeColor: 'cyan',
-        strokeWeight: 2
-    };
-
-
     let choosingLocationClicked = (e)=>{
         e.preventDefault();
       updateClickCallback(()=> {
-              // (event)=>{}
           return (event)=>{
               if (event !== undefined) {
                   updatePosition([event.latLng.lat(), event.latLng.lng()]);
@@ -77,8 +83,6 @@ const MyMapComponent = compose(
     var google = window.google;
 
     let getString = (point, segments)=>{
-        console.log("Segments: ", segments);
-        console.log("Point: ", point);
         let finalString = "";
         segments.forEach((otherPoint, idx)=>{
             if (Math.abs(point.lat - otherPoint.lat) < 1e-20 && Math.abs(point.lng - otherPoint.lng) < 1e-20) {
@@ -88,8 +92,13 @@ const MyMapComponent = compose(
                 finalString += idx.toString();
             }
         });
-        console.log("Final String: ", finalString);
         return finalString;
+    };
+
+    let formDistUpdate = (event)=>{
+        console.log("Changed dist: ",event.target.value);
+        console.log("As float: ", parseFloat(event.target.value));
+        updateDist(parseFloat(event.target.value));
     };
 
     return (<GoogleMap
@@ -99,14 +108,40 @@ const MyMapComponent = compose(
     >
         <CustomDrawingManagerControl marginLeft={4} marginTop={12} >
             <button onClick={(e)=>{choosingLocationClicked(e)}}>Choose Drawing Location</button>
-            <UploadButton drawingPos={drawingPosition} updatePath={pathUpdate} updateResult={updateResult}
+            <UploadButton updateImage={updateImage} drawingPos={drawingPosition} updatePath={pathUpdate} updateResult={updateResult}
                 updateNodes={updateNodes}/>
+
+                <TextField defaultValue={text} id={shortid.generate()} onBlur={(event)=>
+                    updateText(event.target.value)} id={shortid.generate()}
+                />
+                <div/>
+                    <TextField defaultValue={distance} onBlur={(event)=>
+                        updateDist(parseFloat(event.target.value))} id={shortid.generate()}
+                               />
+            <div/>
+            <Select
+                native
+                value={mode}
+                onChange={(event)=>{updateMode(event.target.value)}}
+                inputProps={{
+                    name: 'age',
+                    id: 'age-native-simple',
+                }}
+            >
+                <option value={'T'}>Text</option>
+                <option value={'I'}>Image</option>
+            </Select>
+
+            <SendButton distance={distance} mode={mode}
+                text={text} image={image} drawingPos={drawingPosition} updatePath={pathUpdate} updateResult={updateResult}
+                        updateNodes={updateNodes}/>
+
         </CustomDrawingManagerControl>
 
-        {segments.map(segment=> segment.map((point, idx) =><Marker label={getString(point, segment)} icon={symbolThree} position={point}/>))}
+        {segments.map((segment,_)=> <Marker label={getString(segment, segments)} icon={symbolThree} position={segment}/>)}
 
-        {segments.map(segment=><Polyline
-            path={segment}
+        <Polyline
+            path={segments}
             geodesic={true}
             options={{
                 strokeColor: "#ff2527",
@@ -116,7 +151,7 @@ const MyMapComponent = compose(
                     {symbolThree}
                 ]
             }}
-        />)}
+        />
 
 
         {resultCoordinates.map((point, idx)=><Marker label={getString(point, resultCoordinates)} icon={symbolThreeBlue}  position={point}/>)}

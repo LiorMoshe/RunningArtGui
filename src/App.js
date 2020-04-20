@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import logo from './logo.svg';
 import './App.css';
 import { compose, withProps } from "recompose"
@@ -11,6 +11,8 @@ import Select from '@material-ui/core/Select';
 import SendButton from "./SendButton/SendButton";
 import {TextField} from "@material-ui/core";
 import shortid from "shortid";
+import axios from 'axios';
+
 
 
 const MyMapComponent = compose(
@@ -67,6 +69,12 @@ const MyMapComponent = compose(
         strokeWeight: 2
     };
 
+    let starSymbolCyan = {
+        path: 'M -2,-2 2,2 M 2,-2 -2,2',
+        strokeColor: 'cyan',
+        strokeWeight: 2
+    };
+
     let choosingLocationClicked = (e)=>{
         e.preventDefault();
       updateClickCallback(()=> {
@@ -79,6 +87,16 @@ const MyMapComponent = compose(
           }
       );
     };
+
+    useEffect(()=>{
+        async function getNodes() {
+            const response = await axios.get("http://localhost:5000/nodes");
+            console.log("Response Data: ",response);
+            updateNodes(response.data.nodes);
+        }
+
+        getNodes();
+    },[]);
 
     var google = window.google;
 
@@ -95,12 +113,6 @@ const MyMapComponent = compose(
         return finalString;
     };
 
-    let formDistUpdate = (event)=>{
-        console.log("Changed dist: ",event.target.value);
-        console.log("As float: ", parseFloat(event.target.value));
-        updateDist(parseFloat(event.target.value));
-    };
-
     return (<GoogleMap
         defaultZoom={16}
         defaultCenter={{lat: 32.0596552, lng: 34.7724450}}
@@ -109,7 +121,7 @@ const MyMapComponent = compose(
         <CustomDrawingManagerControl marginLeft={4} marginTop={12} >
             <button onClick={(e)=>{choosingLocationClicked(e)}}>Choose Drawing Location</button>
             <UploadButton updateImage={updateImage} drawingPos={drawingPosition} updatePath={pathUpdate} updateResult={updateResult}
-                updateNodes={updateNodes}/>
+                />
 
                 <TextField defaultValue={text} id={shortid.generate()} onBlur={(event)=>
                     updateText(event.target.value)} id={shortid.generate()}
@@ -134,7 +146,7 @@ const MyMapComponent = compose(
 
             <SendButton distance={distance} mode={mode}
                 text={text} image={image} drawingPos={drawingPosition} updatePath={pathUpdate} updateResult={updateResult}
-                        updateNodes={updateNodes}/>
+            />
 
         </CustomDrawingManagerControl>
 
@@ -165,7 +177,7 @@ const MyMapComponent = compose(
             }}
         />
 
-        {/*{nodes.map(node=><Marker icon={starSymbolCyan} position={{"lat": node[0], "lng":node[1]}}/>)}*/}
+        {nodes.map(node=><Marker icon={starSymbolCyan} position={{"lat": node[0], "lng":node[1]}}/>)}
         {drawingPosition.length !== 0 && <Marker position={{ lat: drawingPosition[0], lng: drawingPosition[1] }}/>}
     </GoogleMap>);
     }

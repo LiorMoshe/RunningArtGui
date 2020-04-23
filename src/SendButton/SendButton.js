@@ -39,11 +39,18 @@ export default class UploadButton extends React.Component {
             return parsedCoords;
         };
 
+
         // Reformat the response and update the paths coordinates.
-        console.log("Received data: ", response.data);
         let resultCoords = response.data.result;
-        // let pathCoords = parseCoordsFormat(coords);
         let pathResult = parseCoordsFormat(resultCoords);
+
+        let paths = response.data.paths;
+        let pathsCoords = [];
+        paths.forEach((path)=>{
+            pathsCoords.push(parseCoordsFormat(path));
+        });
+        this.props.updatePaths(pathsCoords);
+
 
         // Update the drawn coordinates used in the given Polyline.
         this.props.updatePath(parseCoordsFormat(response.data.segments));

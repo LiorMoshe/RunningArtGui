@@ -48,6 +48,9 @@ const MyMapComponent = compose(
     // Declare a state for the mode.
     let [mode, updateMode] = useState('I');
 
+    // Declare path for all of dijkstra's paths.
+    let [paths, updatePaths] = useState([]);
+
     let [onClickCallback, updateClickCallback] = useState(()=>{
         return (event)=> {};
     });
@@ -113,6 +116,26 @@ const MyMapComponent = compose(
         return finalString;
     };
 
+    // Get the label string with
+    let getStringWithPath = (point, dijkstraPaths)=>{
+        let finalString = "";
+
+        let cnt = 0;
+        // let pathCnt /= 0;
+        dijkstraPaths.forEach((path, idx)=>{
+                path.forEach((otherPoint, _)=>{
+                    if (Math.abs(point.lat - otherPoint.lat) < 1e-20 && Math.abs(point.lng - otherPoint.lng) < 1e-20) {
+                        if (finalString.length > 0) {
+                            finalString += ',';
+                        }
+                        finalString += idx.toString() + ":" + cnt.toString();
+                    }
+                    cnt++;
+                });
+        });
+        return finalString;
+    };
+
     return (<GoogleMap
         defaultZoom={16}
         defaultCenter={{lat: 32.0596552, lng: 34.7724450}}
@@ -146,6 +169,7 @@ const MyMapComponent = compose(
 
             <SendButton distance={distance} mode={mode}
                 text={text} image={image} drawingPos={drawingPosition} updatePath={pathUpdate} updateResult={updateResult}
+                        updatePaths={updatePaths}
             />
 
         </CustomDrawingManagerControl>
@@ -165,8 +189,10 @@ const MyMapComponent = compose(
             }}
         />
 
-
-        {resultCoordinates.map((point, idx)=><Marker label={getString(point, resultCoordinates)} icon={symbolThreeBlue}  position={point}/>)}
+        {/*{paths.map((path)=>{path.map((point, _)=>*/}
+        {/*    <Marker label={getStringWithPath(point, paths)} icon={symbolThreeBlue} position={point}/>*/}
+        {/*)})}*/}
+        {resultCoordinates.map((point, idx)=><Marker label={getStringWithPath(point, paths)} icon={symbolThreeBlue}  position={point}/>)}
         <Polyline
             path={resultCoordinates}
             geodesic={true}

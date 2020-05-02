@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import logo from './logo.svg';
 import './App.css';
 import { compose, withProps } from "recompose"
-import { withScriptjs, withGoogleMap, GoogleMap, Polyline, Marker } from "react-google-maps"
+import { withScriptjs, withGoogleMap, GoogleMap, Polyline, Marker, InfoWindow} from "react-google-maps"
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import { Dropdown } from 'semantic-ui-react'
 import CustomDrawingManagerControl from "./CustomDrawingManagerControl";
@@ -12,6 +12,7 @@ import SendButton from "./SendButton/SendButton";
 import {TextField} from "@material-ui/core";
 import shortid from "shortid";
 import axios from 'axios';
+import OSMNode from "./OSMNode";
 
 
 
@@ -34,7 +35,10 @@ const MyMapComponent = compose(
     let [drawingPosition, updatePosition] = useState([]);
 
     // Declare a state for osm's nodes, they will be drawn as markers on the map.
-    let [nodes, updateNodes] = useState([]);
+    // let [nodes, updateNodes] = useState([]);
+
+    // Declare a state for the nodes map.
+    let [nodesMap, updateNodesMap] = useState({});
 
     // Declare a state for the run's distance.
     let [distance, updateDist] = useState(1000);
@@ -66,7 +70,7 @@ const MyMapComponent = compose(
         strokeWeight: 4
     };
 
-    let symbolThreeBlue = {
+    let symbolThreePink = {
         path: 'M -8,-8 8,8 M 8,-8 -8,8',
         strokeColor: 'pink',
         strokeWeight: 2
@@ -77,6 +81,7 @@ const MyMapComponent = compose(
         strokeColor: 'cyan',
         strokeWeight: 2
     };
+
 
     let choosingLocationClicked = (e)=>{
         e.preventDefault();
@@ -95,7 +100,9 @@ const MyMapComponent = compose(
         async function getNodes() {
             const response = await axios.get("http://localhost:5000/nodes");
             console.log("Response Data: ",response);
-            updateNodes(response.data.nodes);
+            console.log(response.data.nodes_map);
+            // updateNodes(response.data.nodes);
+            updateNodesMap(response.data.nodes_map);
         }
 
         getNodes();
@@ -117,14 +124,12 @@ const MyMapComponent = compose(
     };
 
     // Get the label string with
-    let getStringWithPath = (point, dijkstraPaths)=>{
+    let getStringWithPath = (node_id, dijkstraPaths)=>{
         let finalString = "";
-
         let cnt = 0;
-        // let pathCnt /= 0;
         dijkstraPaths.forEach((path, idx)=>{
                 path.forEach((otherPoint, _)=>{
-                    if (Math.abs(point.lat - otherPoint.lat) < 1e-20 && Math.abs(point.lng - otherPoint.lng) < 1e-20) {
+                    if (parseFloat(otherPoint.id) === parseFloat(node_id)) {
                         if (finalString.length > 0) {
                             finalString += ',';
                         }
@@ -174,7 +179,7 @@ const MyMapComponent = compose(
 
         </CustomDrawingManagerControl>
 
-        {segments.map((segment,_)=> <Marker label={getString(segment, segments)} icon={symbolThree} position={segment}/>)}
+        {segments.map((segment,_)=> {return <Marker label={getString(segment, segments)} icon={symbolThree} position={segment}/>})}
 
         <Polyline
             path={segments}
@@ -188,11 +193,6 @@ const MyMapComponent = compose(
                 ]
             }}
         />
-
-        {/*{paths.map((path)=>{path.map((point, _)=>*/}
-        {/*    <Marker label={getStringWithPath(point, paths)} icon={symbolThreeBlue} position={point}/>*/}
-        {/*)})}*/}
-        {resultCoordinates.map((point, idx)=><Marker label={getStringWithPath(point, paths)} icon={symbolThreeBlue}  position={point}/>)}
         <Polyline
             path={resultCoordinates}
             geodesic={true}
@@ -202,8 +202,10 @@ const MyMapComponent = compose(
                 strokeWeight: 2,
             }}
         />
-
-        {nodes.map(node=><Marker icon={starSymbolCyan} position={{"lat": node[0], "lng":node[1]}}/>)}
+        }
+        {Object.keys(nodesMap).map(node_id => {
+            return <OSMNode label={getStringWithPath(node_id, paths)} icon={starSymbolCyan} lat={nodesMap[node_id][0]} lng={nodesMap[node_id][1]} info={node_id.toString()}/>
+        })}
         {drawingPosition.length !== 0 && <Marker position={{ lat: drawingPosition[0], lng: drawingPosition[1] }}/>}
     </GoogleMap>);
     }

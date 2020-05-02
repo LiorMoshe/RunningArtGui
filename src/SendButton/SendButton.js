@@ -47,7 +47,12 @@ export default class UploadButton extends React.Component {
         let paths = response.data.paths;
         let pathsCoords = [];
         paths.forEach((path)=>{
-            pathsCoords.push(parseCoordsFormat(path));
+            let currentPath = [];
+            path.forEach((point)=>{
+                currentPath.push(point);
+            });
+            pathsCoords.push(currentPath);
+            // pathsCoords.push());
         });
         this.props.updatePaths(pathsCoords);
 

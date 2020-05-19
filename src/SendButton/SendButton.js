@@ -1,7 +1,6 @@
 import React from "react";
 import Button from "@material-ui/core/Button";
 import axios from 'axios';
-// import './UploadButton.css';
 
 export default class UploadButton extends React.Component {
 
@@ -52,9 +51,9 @@ export default class UploadButton extends React.Component {
                 currentPath.push(point);
             });
             pathsCoords.push(currentPath);
-            // pathsCoords.push());
         });
         this.props.updatePaths(pathsCoords);
+        this.props.updateNodes(response.data.nodes_map);
 
 
         // Update the drawn coordinates used in the given Polyline.

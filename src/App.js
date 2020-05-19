@@ -4,7 +4,6 @@ import './App.css';
 import { compose, withProps } from "recompose"
 import { withScriptjs, withGoogleMap, GoogleMap, Polyline, Marker, InfoWindow} from "react-google-maps"
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
-import { Dropdown } from 'semantic-ui-react'
 import CustomDrawingManagerControl from "./CustomDrawingManagerControl";
 import UploadButton from "./UploadButton/UploadButton";
 import Select from '@material-ui/core/Select';
@@ -33,9 +32,6 @@ const MyMapComponent = compose(
 
     // Declare state for the chosen drawing position based on the user's request.
     let [drawingPosition, updatePosition] = useState([]);
-
-    // Declare a state for osm's nodes, they will be drawn as markers on the map.
-    // let [nodes, updateNodes] = useState([]);
 
     // Declare a state for the nodes map.
     let [nodesMap, updateNodesMap] = useState({});
@@ -96,17 +92,14 @@ const MyMapComponent = compose(
       );
     };
 
-    useEffect(()=>{
-        async function getNodes() {
-            const response = await axios.get("http://localhost:5000/nodes");
-            console.log("Response Data: ",response);
-            console.log(response.data.nodes_map);
-            // updateNodes(response.data.nodes);
-            updateNodesMap(response.data.nodes_map);
-        }
-
-        getNodes();
-    },[]);
+    // useEffect(()=>{
+    //     async function getNodes() {
+    //         const response = await axios.get("http://localhost:5000/nodes");
+    //         updateNodesMap(response.data.nodes_map);
+    //     }
+    //
+    //     getNodes();
+    // },[]);
 
     var google = window.google;
 
@@ -174,7 +167,7 @@ const MyMapComponent = compose(
 
             <SendButton distance={distance} mode={mode}
                 text={text} image={image} drawingPos={drawingPosition} updatePath={pathUpdate} updateResult={updateResult}
-                        updatePaths={updatePaths}
+                        updatePaths={updatePaths} updateNodes={updateNodesMap}
             />
 
         </CustomDrawingManagerControl>
